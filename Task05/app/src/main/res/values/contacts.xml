@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="contacts">
+        <item>Ruslan Garifullin|+79777088890|Moscow</item>
+        <item>Dmytriy Lobachev|+79042664411|Sayanogorsk</item>
+        <item>Andrey Romanyuk|+79886445353|Moscow</item>
+        <item>Pavel Durov|+18006007565|Berlin</item>
+    </string-array>
+</resources>

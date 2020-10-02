@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Task 02</string>
+    <string name="FAVOURITE_PET_QUESTION">What is your favourite pet?</string>
+    <string name="SET">Set</string>
+    <string name="FAVOURITE_PET_PLACEHOLDER">Favourite pet</string>
+    <string name="STUDENT_INFO">Гарифуллин Руслан Ильфатович БПИ191</string>
+</resources>
