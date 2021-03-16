@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="text_primary">#d5d6d7</color>
+    <color name="dark_100">#40444A</color>
+    <color name="dark_200">#36393f</color>
+    <color name="dark_500">#2f3136</color>
+    <color name="dark_800">#202225</color>
+    <color name="nexo_200">#492471</color>
+    <color name="nexo_500">#b580ef</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>

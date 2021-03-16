@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Widget.App.NavigationView" parent="Widget.MaterialComponents.NavigationView">
+        <item name="itemIconTint">@color/text_primary</item>
+        <item name="itemTextColor">@color/text_primary</item>
+        <item name="itemShapeFillColor">@color/navigation_item_background_color</item>
+        <item name="android:titleTextColor">@color/white</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:keyTextColor">@color/white</item>
+        <item name="android:color">@color/white</item>
+        <item name="android:actionMenuTextColor">@color/white</item>
+    </style>
+
+    <style name="ChannelsListView">
+    </style>
+</resources>

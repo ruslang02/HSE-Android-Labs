@@ -3,9 +3,9 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/settings_button"
-        android:title="Settings" />
+        android:id="@+id/settings"
+        android:title="Настройки" />
     <item
-        android:id="@+id/about_button"
-        android:title="About" />
+        android:id="@+id/about"
+        android:title="О программе" />
 </menu>

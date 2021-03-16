@@ -1,12 +1,17 @@
 <resources>
-    <!-- Reply Preference -->
-    <string-array name="reply_entries">
-        <item>Reply</item>
-        <item>Reply to all</item>
+    <string-array name="audio_quality_entries">
+        <item>Исходное</item>
+        <item>Opus (256 кбит/с)</item>
+        <item>Opus (128 кбит/с)</item>
+        <item>Opus (96 кбит/с)</item>
+        <item>Opus (64 кбит/с)</item>
     </string-array>
 
-    <string-array name="reply_values">
-        <item>reply</item>
-        <item>reply_all</item>
+    <string-array name="audio_quality_values">
+        <item>source</item>
+        <item>opus256</item>
+        <item>opus128</item>
+        <item>opus96</item>
+        <item>opus64</item>
     </string-array>
 </resources>

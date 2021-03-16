@@ -1,13 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="Аудио">
+
+    </PreferenceCategory>
     <SwitchPreference
+        android:defaultValue="true"
+        android:key="cache_tracks"
+        android:summary="Это может занять очень много места при высоком качестве."
+        android:title="Кэшировать треки автоматически" />
+    <ListPreference
+        android:defaultValue="1"
+        android:entries="@array/audio_quality_entries"
+        android:entryValues="@array/audio_quality_values"
+        android:key="audio_quality"
+        android:title="Качество по умолчанию" />
+    <PreferenceCategory android:title="Аккаунт">
+
+    </PreferenceCategory>
+    <CheckBoxPreference
         android:defaultValue="false"
-        android:key="switch_preference_1"
-        android:title="Switch preference" />
-    <EditTextPreference
-        android:defaultValue="Default value"
-        android:key="edit_text_preference_1"
-        android:selectAllOnFocus="true"
-        android:singleLine="true"
-        android:title="Edit text preference" />
+        android:key="ask_pwd"
+        android:title="Спрашивать пароль при входе" />
 </PreferenceScreen>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/nav_header_height"
+    android:background="@color/nexo_200"
+    android:gravity="bottom|center"
+    android:orientation="vertical"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingBottom="12dp"
+    android:theme="@style/ThemeOverlay.AppCompat.Dark">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <com.pkmmte.view.CircularImageView
+            android:id="@+id/userAvatar"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginRight="8dp"
+            android:src="@drawable/ic_launcher_background" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/userName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:elegantTextHeight="false"
+                android:fontFamily="sans-serif"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:text="Nebby"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:textSize="24sp"
+                app:autoSizeTextType="none" />
+
+            <TextView
+                android:id="@+id/userTag"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:text="#0001" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

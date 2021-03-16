@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="60dp"
+    android:background="@color/dark_200"
+    android:orientation="horizontal"
+    android:paddingLeft="12dp"
+    android:paddingTop="6dp"
+    android:paddingRight="12dp"
+    android:paddingBottom="12dp">
+
+    <EditText
+        android:id="@+id/editTextTextPersonName"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginRight="6dp"
+        android:layout_weight="2"
+        android:background="@drawable/rounded_text"
+        android:hint="Message"
+        android:inputType="textPersonName"
+        android:paddingStart="12dp"
+        android:textColor="#FFFFFF"
+        android:textColorHint="#818181"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/button"
+        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+        android:layout_width="44dp"
+        android:layout_height="match_parent"
+        android:layout_weight="0"
+        android:background="@drawable/rounded_button"
+        android:insetTop="8dp"
+        android:insetBottom="0dp"
+        android:minWidth="56dp"
+        android:minHeight="56dp"
+        android:padding="0dp"
+        app:icon="@android:drawable/ic_menu_send"
+        app:iconGravity="textTop"
+        app:iconTint="#FFFFFF" />
+</LinearLayout>
