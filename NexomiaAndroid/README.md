@@ -5,4 +5,4 @@
 
 Клиент-серверное взаимодействие осуществляется при помощи WebSocket и HTTP API, для проектирования приложения использовалась IDE Android Studio.
 
-![screenshot](screenshot.png)
+![screenshot](screenshot_sm.png)
