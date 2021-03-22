@@ -30,13 +30,19 @@ import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class NVWSClient {
+    private static final String userAgent = "com.devexito.nexomia6";
     private WebSocket ws;
 
     private RequestQueue queue;
@@ -52,6 +58,20 @@ public class NVWSClient {
     private String channelName = "";
 
     private JSONArray users;
+
+    public JSONObject getUser() {
+        return user;
+    }
+
+    private JSONObject user;
+
+    public void setMessageListener(MessageListener messageListener) {
+        this.messageListener = messageListener;
+    }
+
+    private MessageListener messageListener;
+
+    private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
 
     static NVWSClient instance = null;
 
@@ -73,16 +93,14 @@ public class NVWSClient {
         return token;
     }
 
-    private NVWSClient() {
-        this("eyJpZCI6IjU2MDczMzE0MzA0OTM0NTA3MzAiLCJmcCI6ImY5Njk1NTI3NDY3MDc1M2JiMDFjMzgyYzZhODc5NDM1IiwiaWF0IjoxNjE1MTMwODEyfQ.fPqiczd-FYNK2fcI3iAjhCjJI_qTTylaZJgCWf4-zGw");
-    }
+    public void setToken(String token) { this.token = token; }
 
-    private NVWSClient(String token) {
+    public void createWS() {
         try {
             ws = new WebSocketFactory().createSocket("ws://nexo.fun:8085/" + token);
-            ws.setDirectTextMessage(false);
-            ws.addExtension("permessage-deflate");
-            ws.addExtension("client_max_window_bits");
+            ws.setPongInterval(5000);
+            ws.setPongSenderName("rrr");
+            ws.setExtended(true);
             ws.addListener(new WebSocketAdapter() {
                 @Override
                 public void onError(WebSocket websocket,
@@ -105,8 +123,46 @@ public class NVWSClient {
 
                 @Override
                 public void onStateChanged(WebSocket websocket, WebSocketState newState) {
-
+                    if (newState.name().equals("OPEN")) {
+                        executorService.scheduleAtFixedRate(new Runnable() {
+                            @Override
+                            public void run() {
+                                ws.sendPing();
+                            }
+                        },
+                                5, 5, TimeUnit.SECONDS);
+                    }
                     Log.i(this.getClass().getName(), "state " + newState.name());
+                }
+
+                @Override
+                public void onCloseFrame(WebSocket websocket, WebSocketFrame frame) throws Exception {
+                    super.onCloseFrame(websocket, frame);
+                    Log.i(this.getClass().getName(), frame.getPayloadText());
+                }
+
+                @Override
+                public void onFrameError(WebSocket websocket, WebSocketException cause, WebSocketFrame frame) throws Exception {
+                    super.onFrameError(websocket, cause, frame);
+                    Log.i(this.getClass().getName(), frame.getPayloadText());
+                }
+
+                @Override
+                public void onMessageError(WebSocket websocket, WebSocketException cause, List<WebSocketFrame> frames) throws Exception {
+                    super.onMessageError(websocket, cause, frames);
+                    Log.i(this.getClass().getName(), cause.getMessage());
+                }
+
+                @Override
+                public void onTextMessageError(WebSocket websocket, WebSocketException cause, byte[] data) throws Exception {
+                    super.onTextMessageError(websocket, cause, data);
+                    Log.i(this.getClass().getName(), cause.getMessage());
+                }
+
+                @Override
+                public void onConnectError(WebSocket websocket, WebSocketException exception) throws Exception {
+                    super.onConnectError(websocket, exception);
+                    Log.i(this.getClass().getName(), exception.getMessage());
                 }
 
                 @Override
@@ -133,6 +189,8 @@ public class NVWSClient {
                     Log.i(this.getClass().getName(), cause.getMessage());
                 }
             });
+            connect();
+            ws.sendPing();
         } catch (IOException e) {
             Log.i(this.getClass().getName(), e.getMessage());
         }
@@ -152,7 +210,7 @@ public class NVWSClient {
             final Map<String, String> params) {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("auth", token);
-        headers.put("User-Agent", "android.com.devexito.nexomia");
+        headers.put("User-Agent", userAgent);
 
         sendRequest(method, url, listener, params, headers);
     }
@@ -203,6 +261,11 @@ public class NVWSClient {
         queue.add(stringRequest);
     }
 
+    public void logout() {
+        setToken(null);
+        ws.disconnect();
+    }
+
     public void login(final String email, final String password, final LoginListener listener) {
         this.email = email;
 
@@ -211,7 +274,7 @@ public class NVWSClient {
         params.put("password", password);
 
         Map<String, String> headers = new HashMap<String, String>();
-        headers.put("User-Agent", "android.com.devexito.nexomia");
+        headers.put("User-Agent", userAgent);
 
         sendRequest(
                 Request.Method.POST,
@@ -225,6 +288,7 @@ public class NVWSClient {
                                 case "verified":
                                     token = resp.getString("token");
                                     listener.onSuccess(token);
+                                    createWS();
                                     break;
                                 case "email_verify":
                                     listener.onEmailVerify();
@@ -244,13 +308,30 @@ public class NVWSClient {
                 headers);
     }
 
+    public void fetchCurrentUser(final RequestListener listener) {
+        sendRequest(
+                Request.Method.POST,
+                "http://nexo.fun:8081/api/users/me",
+                new RequestListener() {
+                    @Override
+                    public void onFinish(JSONObject resp) {
+                        try {
+                            user = resp.getJSONObject("user");
+                            listener.onFinish(user);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+    }
+
     public void verify(final String code, final LoginListener listener) {
         Map<String, String> params = new HashMap<String, String>();
         params.put("email", email);
         params.put("code", code);
 
         Map<String, String> headers = new HashMap<String, String>();
-        headers.put("User-Agent", "android.com.devexito.nexomia");
+        headers.put("User-Agent", userAgent);
 
         sendRequest(Request.Method.POST, "http://nexo.fun:8081/api/auth/verifyEmail",
                 new RequestListener() {
@@ -290,10 +371,10 @@ public class NVWSClient {
     }
 
     public void send(JSONObject data) {
-        byte[] encoded = Base64.encode(data.toString().getBytes(), Base64.DEFAULT);
-        Log.i(this.getClass().getName(), data.toString());
+        String encoded = Base64.encodeToString(data.toString().getBytes(), Base64.DEFAULT);
+        Log.i(this.getClass().getName(), data.toString() + " " + encoded);
 
-        ws.sendBinary(encoded);
+        ws.sendText(encoded);
     }
 
     public String getServerId() {
@@ -344,5 +425,17 @@ public class NVWSClient {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public void sendMessage(String content) {
+        try {
+            JSONObject obj = new JSONObject("{\"text\":\"" + content + "\", \"user\": \"" + user.getString("id") + "\", \"channel\": \"" + channelId + "\", \"server\": \"" + serverId + "\", \"created\": 1615926359763,\"resents\": [], \"attachments\": [], \"tempId\": \"d\"}}}");
+            send(obj);
+            if (messageListener != null) {
+                messageListener.onMessageCreate(obj);
+            }
+        } catch (JSONException e) {
+            Log.i(this.getClass().getName(), e.getMessage());
+        }
     }
 }

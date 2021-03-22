@@ -20,8 +20,8 @@ import org.json.JSONObject;
 import java.util.Date;
 
 public class MessagesListAdapter extends RecyclerView.Adapter<MessagesListAdapter.ViewHolder> {
-    private FragmentActivity activity;
-    private JSONArray dataSet;
+    private final FragmentActivity activity;
+    private final JSONArray dataSet;
 
     public MessagesListAdapter(FragmentActivity activity, JSONArray dataSet) {
         this.dataSet = dataSet;

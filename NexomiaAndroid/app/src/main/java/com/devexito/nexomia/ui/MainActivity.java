@@ -1,10 +1,13 @@
 package com.devexito.nexomia.ui;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Looper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -42,29 +45,23 @@ public class MainActivity extends AppCompatActivity {
 
     Toolbar toolbar;
 
-    SubMenu serversMenu;
+    SharedPreferences sharedPref;
 
-    @Override
-    protected void onRestart() {
-        super.onRestart();
-        if (checkToken()) return;
-
-        updateUserInfo();
-        updateServers();
-    }
+    SubMenu serverMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         toolbar = findViewById(R.id.toolbar);
+        sharedPref = getPreferences(Context.MODE_PRIVATE);
         setSupportActionBar(toolbar);
         navigationView = findViewById(R.id.nav_view);
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_channels_list, R.id.nav_welcome, R.id.nav_messages)
+                R.id.nav_channels_list, R.id.nav_welcome, R.id.nav_friends_list)
                 .setDrawerLayout(drawer)
                 .build();
         navController = Navigation.findNavController(this, R.id.nav_host_fragment);
@@ -87,44 +84,111 @@ public class MainActivity extends AppCompatActivity {
                 NVWSClient.getInstance().setServerId("@me");
                 navController.navigate(R.id.nav_channels_list);
                 createOptionsMenu(toolbar.getMenu());
+                toolbar.setTitle("Direct Messages");
                 item.setChecked(true);
                 return true;
             }
         });
-        serversMenu = menu.addSubMenu("Servers");
+        menu.getItem(2).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                navController.navigate(R.id.nav_friends_list);
+                item.setChecked(true);
+                toolbar.getMenu().clear();
+                return true;
+            }
+        });
+        NavigationView bottom_nav = findViewById(R.id.bottom_nav);
+        bottom_nav.getMenu().getItem(0).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                NVWSClient.getInstance().logout();
+                Intent intent = new Intent(MainActivity.this,
+                        StatusChangeActivity.class);
+                startActivity(intent);
+                return false;
+            }
+        });
+        bottom_nav.getMenu().getItem(1).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                Intent intent = new Intent(MainActivity.this,
+                        SettingsActivity.class);
+                startActivity(intent);
+                return false;
+            }
+        });
+        bottom_nav.getMenu().getItem(2).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                NVWSClient.getInstance().logout();
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.putString("token", null);
+                editor.apply();
+                Intent intent = new Intent(MainActivity.this,
+                        LoginActivity.class);
+                startActivity(intent);
+                return false;
+            }
+        });
+        serverMenu = menu.addSubMenu("Servers");
+        initClient();
+    }
 
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        initClient();
+    }
+
+    private void initClient() {
         if (checkToken()) return;
-
-        updateUserInfo();
+        new android.os.Handler(Looper.getMainLooper()).postDelayed(
+                new Runnable() {
+                    public void run() {
+                        updateUserInfo();
+                    }
+                },
+                1000);
         updateServers();
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString("token", NVWSClient.getInstance().getToken());
+        editor.apply();
     }
 
     private boolean checkToken() {
         if (NVWSClient.getInstance().getToken() == null) {
-            Intent intent = new Intent(MainActivity.this,
-                    LoginActivity.class);
-            startActivity(intent);
-            return true;
+            String token = sharedPref.getString("token", null);
+            if (token == null) {
+                Intent intent = new Intent(MainActivity.this,
+                        LoginActivity.class);
+                startActivity(intent);
+                return true;
+            } else {
+                NVWSClient.getInstance().setContext(getApplicationContext());
+                NVWSClient.getInstance().setToken(token);
+                NVWSClient.getInstance().createWS();
+            }
         }
         return false;
     }
 
     private void updateUserInfo() {
-        NVWSClient.getInstance().sendRequest(Request.Method.POST, "http://nexo.fun:8081/api/users/me", new RequestListener() {
+        NVWSClient.getInstance().fetchCurrentUser(new RequestListener() {
             @Override
             public void onFinish(JSONObject object) {
                 ImageView userAvatar = (ImageView) findViewById(R.id.userAvatar);
                 TextView userName = (TextView) findViewById(R.id.userName);
                 TextView userTag = (TextView) findViewById(R.id.userTag);
                 try {
-                    String avatar = object.getJSONObject("user").getString("avatar");
+                    String avatar = object.getString("avatar");
                     if (avatar.equals("")) {
                         Picasso.get().load("http://nexo.fun:8084/img/defaultAvatar.3304bd4b.png").into(userAvatar);
                     } else {
                         Picasso.get().load(avatar).into(userAvatar);
                     }
-                    userName.setText(object.getJSONObject("user").getString("name"));
-                    userTag.setText("#" + object.getJSONObject("user").getString("tag"));
+                    userName.setText(object.getString("name"));
+                    userTag.setText("#" + object.getString("tag"));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -136,12 +200,13 @@ public class MainActivity extends AppCompatActivity {
         NVWSClient.getInstance().sendRequest(Request.Method.POST, "http://nexo.fun:8081/api/servers/list", new RequestListener() {
             @Override
             public void onFinish(JSONObject object) {
+                serverMenu.clear();
                 try {
                     JSONArray servers = object.getJSONArray("servers");
-                    serversMenu.clear();
                     for(int i = 0; i < servers.length(); i++) {
                         final JSONObject server = servers.getJSONObject(i);
-                        final MenuItem item = serversMenu.add(server.getString("title"));
+                        final MenuItem item = serverMenu.add(server.getString("title"));
+                        item.setIcon(getResources().getDrawable(R.drawable.ic_channel));
                         if (!server.getString("avatar").equals("")) {
                             Picasso.get().load(server.getString("avatar")).into(new Target() {
                                 @Override
@@ -160,6 +225,7 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             });
                         }
+                        item.setCheckable(true);
                         item.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                             @Override
                             public boolean onMenuItemClick(MenuItem i) {
@@ -186,7 +252,7 @@ public class MainActivity extends AppCompatActivity {
     public void createOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.server, menu);
-        menu.findItem(R.id.action_settings).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        menu.findItem(R.id.leave_server).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 NVWSClient.getInstance().setStatus();

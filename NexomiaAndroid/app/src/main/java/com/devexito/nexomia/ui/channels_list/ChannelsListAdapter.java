@@ -23,8 +23,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class ChannelsListAdapter extends RecyclerView.Adapter<ChannelsListAdapter.ViewHolder> {
-    private FragmentActivity activity;
-    private JSONArray dataSet;
+    private final FragmentActivity activity;
+    private final JSONArray dataSet;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private final Button chButton;

@@ -41,8 +41,13 @@ public class ChannelsListFragment extends Fragment {
                 @Override
                 public void onFinish(JSONObject object) {
                     try {
-                        JSONArray channels = object.getJSONArray("channels");
-                        ((RecyclerView) view).setAdapter(new ChannelsListAdapter(getActivity(), channels));
+                        if (NVWSClient.getInstance().getServerId().equals("@me")) {
+                            JSONArray channels = new JSONArray("[{\"id\": \"5607331430493450730\", \"title\": \"ruslang02\"}]");
+                            ((RecyclerView) view).setAdapter(new ChannelsListAdapter(getActivity(), channels));
+                        } else {
+                            JSONArray channels = object.getJSONArray("channels");
+                            ((RecyclerView) view).setAdapter(new ChannelsListAdapter(getActivity(), channels));
+                        }
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }

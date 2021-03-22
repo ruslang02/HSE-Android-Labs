@@ -23,6 +23,14 @@ public class LoginActivity extends Activity {
     }
 
     @Override
+    protected void onRestart() {
+        super.onRestart();
+        if (NVWSClient.getInstance().getToken() != null) {
+            finish();
+        }
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         NVWSClient.getInstance().setContext(getApplicationContext());

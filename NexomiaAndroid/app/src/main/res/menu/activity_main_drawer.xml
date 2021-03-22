@@ -7,11 +7,19 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_welcome_item"
+            android:checkable="true"
+            android:checked="true"
+            android:enabled="true"
             android:icon="@drawable/ic_menu_explore"
             android:title="Explore" />
         <item
             android:id="@+id/nav_dm_item"
             android:icon="@drawable/ic_menu_dm"
-            android:title="Direct Messages" />
+            android:title="Direct Messages"
+            android:visible="true" />
+        <item
+            android:id="@+id/nav_friends"
+            android:icon="@drawable/ic_friends"
+            android:title="Friends" />
     </group>
 </menu>

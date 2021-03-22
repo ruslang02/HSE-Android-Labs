@@ -11,6 +11,14 @@
         <item name="android:actionMenuTextColor">@color/white</item>
     </style>
 
-    <style name="ChannelsListView">
+    <style name="NavigationViewStyle">
+        <item name="itemIconTint">@color/text_primary</item>
+        <item name="itemTextColor">@color/text_primary</item>
+        <item name="itemShapeFillColor">@color/navigation_item_background_color</item>
+        <item name="android:titleTextColor">@color/white</item>
+
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:textColorSecondary">@color/white</item>
+        <item name="android:subtitleTextColor">#FFFFFF</item>
     </style>
 </resources>

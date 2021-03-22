@@ -3,22 +3,24 @@ package com.devexito.nexomia.ui.messages;
 import android.content.Context;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
 
 import com.android.volley.Request;
 import com.devexito.nexomia.R;
+import com.devexito.nexomia.api.MessageListener;
 import com.devexito.nexomia.api.NVWSClient;
 import com.devexito.nexomia.api.RequestListener;
-import com.devexito.nexomia.ui.channels_list.ChannelsListAdapter;
-import com.devexito.nexomia.ui.dummy.DummyContent;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -46,6 +48,10 @@ public class MessagesListFragment extends Fragment {
         return fragment;
     }
 
+    private MessagesListAdapter adapter;
+
+    private JSONArray messages;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -64,13 +70,36 @@ public class MessagesListFragment extends Fragment {
                 @Override
                 public void onFinish(JSONObject object) {
                     try {
-                        JSONArray messages = object.getJSONArray("messages");
-                        ((RecyclerView) view).setAdapter(new MessagesListAdapter(getActivity(), messages));
+                        messages = object.getJSONArray("messages");
+                        adapter = new MessagesListAdapter(getActivity(), messages);
+                        ((RecyclerView) view).setAdapter(adapter);
+                        new android.os.Handler(Looper.getMainLooper()).postDelayed(
+                                new Runnable() {
+                                    public void run() {
+                                        ((RecyclerView) view).scrollBy(0, 10000000);
+                                    }
+                                },
+                                300);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 }
             }, params);
+
+            NVWSClient.getInstance().setMessageListener(new MessageListener() {
+                @Override
+                public void onMessageCreate(JSONObject message) {
+                    if (adapter != null) {
+                        try {
+                            messages.put(messages.length(), message);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        adapter.notifyDataSetChanged();
+                        ((RecyclerView) getView()).scrollBy(0, 10000000);
+                    }
+                }
+            });
         }
 
         return view;
